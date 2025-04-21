@@ -1,0 +1,9 @@
+torch,
+diffusers,
+transformers
+accelerate
+peft
+lora
+datasets
+Pillow
+onnxruntime
