@@ -1,0 +1,11 @@
+base_model_path: "runwayml/stable-diffusion-v1-5"
+latents_dir: "data/latents"
+output_dir: "models/lora_adapters"
+lora_rank: 4
+lora_alpha: 16
+learning_rate: 1e-4
+batch_size: 1
+num_epochs: 3
+gradient_accumulation_steps: 2
+mixed_precision: "fp16"
+resolution: 256
