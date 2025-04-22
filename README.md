@@ -1,4 +1,4 @@
-# LoRA Adapter for Edge Vision (Satellite/Drone Imagery)
+# LoRA Adapter for Edge Vision (Satellite Imagery)
 
 **Project Goal:** Fine‑tune a Stable Diffusion model using LoRA adapters on satellite/drone imagery, then package it for efficient on‑device inference.
 
