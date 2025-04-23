@@ -7,6 +7,7 @@ from peft import LoraConfig, get_peft_model
 from diffusers import StableDiffusionPipeline
 from tqdm import tqdm
 
+
 class LatentDataset(Dataset):
   """Loads precomputed VAE latents (.pt files) and a prompt."""
   def __init__(self, latents_dir, prompt="Aerial view photo"):
@@ -27,12 +28,14 @@ class LatentDataset(Dataset):
       "prompt": self.prompt
     }
 
+
 def load_cfg(path="configs/train.yaml"):
   '''Loads training config from YAML file.'''
   if not os.path.exists(path):
     raise FileNotFoundError(f"Config file {path} not found.")
   with open(path) as f:
     return yaml.safe_load(f)
+
 
 def main():
   '''Main function to train LoRA adapters for Stable Diffusion.'''
@@ -94,6 +97,7 @@ def main():
   os.makedirs(cfg["output_dir"], exist_ok=True)
   pipe.unet.save_pretrained(cfg["output_dir"])
   print(f"Saved LoRA adapters to {cfg['output_dir']}")
+
 
 if __name__ == "__main__":
   main()

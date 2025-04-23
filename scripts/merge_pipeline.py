@@ -5,6 +5,11 @@ from peft import PeftModel
 
 
 def main():
+  """
+  Merge a LoRA adapter with a Stable Diffusion pipeline.
+  This script loads a base Stable Diffusion model and a LoRA adapter,
+  merges them, and saves the resulting model to a specified directory.
+  """
   base_model = "runwayml/stable-diffusion-v1-5"
   lora_adapter = "models/lora_adapters"
   output_dir = "models/sd_lora_pipeline"
@@ -15,7 +20,7 @@ def main():
   )
   os.makedirs(output_dir, exist_ok=True)
   base_pipe.save_pretrained(output_dir)
-  print(f"✅ Saved base pipeline to: {output_dir}")
+  print(f"Saved base pipeline to: {output_dir}")
 
   pipe = StableDiffusionPipeline.from_pretrained(
     output_dir,

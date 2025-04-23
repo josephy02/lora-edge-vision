@@ -4,15 +4,19 @@ from tqdm import tqdm
 from diffusers import StableDiffusionPipeline
 from PIL import Image
 
-# Precompute VAE latents for all processed images
 
 def main():
+  """
+  Precompute VAE latents for all processed images.
+  This script loads a Stable Diffusion pipeline, processes images from a specified directory,
+  and saves the resulting latents to a specified output directory.
+  """
   model_id = "runwayml/stable-diffusion-v1-5"
   data_dir = "data/processed_images"
   out_dir = "data/latents"
   os.makedirs(out_dir, exist_ok=True)
 
-  # Load pipeline (only VAE & feature extractor needed)
+  # Load the Stable Diffusion pipeline
   pipe = StableDiffusionPipeline.from_pretrained(model_id)
   pipe = pipe.to("cpu")  # or "mps" if desired
   pipe.set_progress_bar_config(disable=True)
@@ -30,12 +34,11 @@ def main():
     inputs = pipe.feature_extractor(images=image, return_tensors="pt")
     pixel_values = inputs["pixel_values"].to(pipe.device)
 
-    # Encode to latents
+    # Here we encode to latents
     with torch.no_grad():
       latents = pipe.vae.encode(pixel_values).latent_dist.sample()
       latents = latents * pipe.vae.config.scaling_factor
 
-    # Save latents to disk
     torch.save(latents.cpu(), latent_path)
 
   print(f"Saved latents for all images to {out_dir}")

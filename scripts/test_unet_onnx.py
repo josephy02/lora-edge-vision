@@ -2,7 +2,11 @@ import numpy as np
 import torch
 import onnxruntime as ort
 
-# Load the LoRA-augmented Stable Diffusion model
+'''
+This script loads a LoRA-augmented Stable Diffusion model in ONNX format,
+runs a forward pass with dummy inputs, and prints the output shape.
+'''
+
 sess = ort.InferenceSession("onnx/unet.onnx")
 # build the same dummy inputs you used to export
 #    – batch size 1, C channels, H×W spatial dims
@@ -12,9 +16,9 @@ dummy_t     = np.array([1], dtype=np.int64)
 # text_encoder.config.max_position_embeddings=77, hidden_size=768 for SD v1.5
 dummy_hs    = np.random.randn(1, 77, 768).astype(np.float32)
 # Map inputs by name
-inp0 = sess.get_inputs()[0].name  # e.g. "sample"
-inp1 = sess.get_inputs()[1].name  # e.g. "timestep"
-inp2 = sess.get_inputs()[2].name  # e.g. "encoder_hidden_states"
+inp0 = sess.get_inputs()[0].name
+inp1 = sess.get_inputs()[1].name
+inp2 = sess.get_inputs()[2].name
 out_name = sess.get_outputs()[0].name
 
 # run & inspect shape
