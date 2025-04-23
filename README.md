@@ -1,95 +1,106 @@
-# LoRA Adapter for Edge Vision (Satellite Imagery)
+# LoRA Edge Vision
 
-**Project Goal:** Fine‑tune a Stable Diffusion model using LoRA adapters on satellite/drone imagery, then package it for efficient on‑device inference.
+This repository demonstrates end-to-end Low-Rank Adaptation (LoRA) fine-tuning of Stable Diffusion for aerial imagery, optimized for on-device edge inference using ONNX.
 
-## 1. Repository Structure
+## Repository Structure
 
 ```
-lora-edge-vision/
-├── data/
-│   ├── raw_images/          # Original satellite/drone images
-│   └── processed_images/    # Resized, normalized dataset
-├── models/
-│   ├── base_model/          # Stable Diffusion weights
-│   └── lora_adapters/       # Trained LoRA adapter weights
-├── notebooks/
-│   └── exploratory.ipynb    # EDA & visualization
-├── src/
-│   ├── dataset.py           # Dataset loading & preprocessing
-│   ├── train_lora.py        # LoRA fine‑tuning script
-│   ├── inference.py         # Generate with base+adapter
-│   ├── export_onnx.py       # ONNX export & quantization
-│   └── utils.py             # Shared utilities
+.
+├── .gitignore
 ├── configs/
-│   └── train.yaml           # Training hyperparameters
-├── requirements.txt         # Python dependencies
-├── README.md                # This overview
-└── .gitignore               # Ignore files
+│   └── train.yaml           # Training configuration
+├── data/
+│   ├── raw_images/          # Original images (ignored)
+│   ├── processed_images/    # Processed & resized images
+│   └── latents/             # Precomputed VAE latents
+├── models/
+│   ├── lora_adapters/       # Trained LoRA weights (ignored)
+│   └── sd_lora_pipeline/    # Merged base+LoRA pipeline (ignored)
+├── onnx/                    # ONNX export outputs (ignored)
+├── outputs/                 # Sample inference outputs (ignored)
+├── scripts/
+│   ├── precompute_latents.py # Precompute VAE latents from images
+│   ├── merge_pipeline.py     # Merge base SD + LoRA weights
+│   └── test_unet_onnx.py     # Smoke-test ONNX UNet forward
+├── src/
+│   ├── dataset.py           # Image & latent dataset loaders
+│   ├── train_lora.py        # LoRA fine-tuning script
+│   ├── inference.py         # PyTorch inference with LoRA
+│   ├── export_onnx.py       # ONNX export via manual torch.onnx
+│   └── inference_onnx.py    # ONNX Runtime inference script
+├── environment.yaml         # Conda environment spec
+├── requirements.txt         # pip requirements
+└── README.md
 ```
 
-## 2. Environment Setup
+## Quickstart
 
-1. **Create & activate virtualenv**:
-
-```bash
-python3.10 -m venv venv
-source venv/bin/activate
-```
-
-2. **Install dependencies**:
+### 1. Setup environment
 
 ```bash
+conda env create -f environment.yaml
+conda activate lora-sd
 pip install -r requirements.txt
 ```
 
-***Key deps:**** `torch`, `diffusers`, `transformers`, `accelerate`, `peft` (or `cloneofsimo/lora`), `datasets`, `Pillow`, `onnxruntime`.*
+### 2. Precompute VAE latents
 
-## 3. Data Preparation
+```bash
+python scripts/precompute_latents.py
+```
 
-* **Raw images**: Place all satellite/drone imagery in `data/raw_images/`.
-* **Preprocessing**: Use `src/dataset.py` to:
-   * Resize to model resolution (e.g. 512×512).
-   * Normalize pixel values.
-   * Optionally pair with text prompts (e.g. `"Aerial view of farmland"`).
-
-## 4. Training LoRA Adapters
-
-* **Run training**:
+### 3. Train LoRA adapter
 
 ```bash
 python src/train_lora.py --config configs/train.yaml
 ```
 
-* **Config options** include:
-   * Base model checkpoint path
-   * Dataset directory
-   * LoRA rank & alpha
-   * Learning rate & batch size
-   * Output adapter directory
-
-## 5. Inference & Packaging
-
-1. **Inference**:
+### 4. Inspect sample outputs
 
 ```bash
 python src/inference.py \
-  --base_model models/base_model \
-  --lora_adapter models/lora_adapters/adapter.pt \
-  --prompt "Thermal map of industrial plant"
+  --base_model runwayml/stable-diffusion-v1-5 \
+  --lora_adapter models/lora_adapters \
+  --prompt "Aerial view of a city at sunset" \
+  --output_dir outputs
 ```
 
-2. **ONNX Export & Quantization**:
+### 5. Merge base + LoRA into full pipeline
 
 ```bash
-python src/export_onnx.py \
-  --model_dir models/base_model \
-  --lora_dir models/lora_adapters \
-  --output onnx/ \
-  --quantize int8
+python scripts/merge_pipeline.py
 ```
 
-## 6. Next Steps
+### 6. Export to ONNX
 
-* **Benchmark**: Evaluate latency & accuracy on CPU and ARM64 devices.
-* **Merge Adapters**: Experiment with combining multiple task‑specific LoRA modules.
-* **Edge Deployment**: Integrate into a mobile app, WebAssembly UI, or NVIDIA Jetson demo.
+```bash
+pip install optimum[exporters] onnx onnxruntime
+optimum-cli export onnx \
+  --model models/sd_lora_pipeline \
+  onnx/ \
+  --task text-to-image \
+  --library diffusers \
+  --framework pt \
+  --opset 14 \
+  --batch_size 1 \
+  --height 512 \
+  --width 512
+```
+
+### 7. Inference with ONNX Runtime
+
+```bash
+python src/inference_onnx.py \
+  --onnx_dir onnx/ \
+  --prompt "Aerial view of a city at sunset"
+```
+
+## Directory & File Notes
+
+- `.gitignore`: excludes large model and data artifacts.
+- `configs/train.yaml`: hyperparameters for LoRA training.
+- `src/train_lora.py`: MPS/CPU‐friendly script with latent precompute support.
+- `scripts/merge_pipeline.py`: merges base SD + LoRA into a single HF pipeline.
+- `src/export_onnx.py`: manual ONNX export for the LoRA‐wrapped UNet.
+- `src/inference_onnx.py`: runs the ONNX pipeline on CPU via ONNX Runtime.
+

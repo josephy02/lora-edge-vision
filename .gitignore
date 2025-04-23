@@ -9,42 +9,49 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
 eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual environment
+# Virtual environments and environment files
 venv/
 .env
+
+# Python dependencies
+requirements.txt
+environment.yaml
 
 # PyTorch and model outputs
 models/
 
-# Data directories (raw, processed, latents)
+# LoRA adapters and generated pipelines
+models/lora_adapters/
+models/sd_lora_pipeline/
+
+# Data directories
 data/raw_images/
 data/processed_images/
 data/latents/
 
-# Jupyter Notebook checkpoints
+# ONNX and inference outputs
+onnx/
+outputs/
+
+# Scripts outputs and caches
+*.pt
+
+# Jupyter Notebook
+*.ipynb
 .ipynb_checkpoints/
 
-# VSCode settings
+# IDE and editor settings
 .vscode/
+.idea/
 
-# macOS files
+# macOS
 .DS_Store
 
 # Logs and databases
@@ -53,4 +60,5 @@ data/latents/
 
 # Miscellaneous
 *.lock
+
 

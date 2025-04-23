@@ -21,19 +21,23 @@ class LatentDataset(Dataset):
 
   def __getitem__(self, idx):
     path = os.path.join(self.latents_dir, self.latent_paths[idx])
-    latents = torch.load(path)       # [1, C, H, W]
+    latents = torch.load(path)       # [1, C, H, W] is the shape of the latent
     return {
-      "latents": latents.squeeze(0),  # [C, H, W]
+      "latents": latents.squeeze(0),  # [C, H, W] is the normalized latent
       "prompt": self.prompt
     }
 
 def load_cfg(path="configs/train.yaml"):
+  '''Loads training config from YAML file.'''
+  if not os.path.exists(path):
+    raise FileNotFoundError(f"Config file {path} not found.")
   with open(path) as f:
     return yaml.safe_load(f)
 
 def main():
+  '''Main function to train LoRA adapters for Stable Diffusion.'''
   cfg = load_cfg()
-  # Hyperparams
+  # Initialize config & parameters
   lr = float(cfg["learning_rate"])
   bs = int(cfg["batch_size"])
   epochs = int(cfg["num_epochs"])
@@ -41,12 +45,13 @@ def main():
   alpha = int(cfg["lora_alpha"])
   accum = int(cfg.get("gradient_accumulation_steps", 1))
 
-  # Device & Accelerator
+  # Initialize accelerator
+  # Check if MPS is available and set device accordingly
   device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
   mp = cfg.get("mixed_precision") if device.type != "mps" else None
   accel  = Accelerator(cpu=False, mixed_precision=mp)
 
-  # Dataset & DataLoader
+  # Load dataset & dataloader
   dataset = LatentDataset(cfg["latents_dir"])
   loader = DataLoader(dataset, batch_size=bs, shuffle=True,
                         num_workers=4, pin_memory=True)
@@ -62,7 +67,9 @@ def main():
   # Prepare for accel
   pipe.unet, optimizer, loader = accel.prepare(pipe.unet, optimizer, loader)
 
-  # Training Loop
+  # This is the training loop in which we train the LoRA adapters
+  # We use gradient checkpointing to save memory
+  # and gradient accumulation to reduce the number of steps
   for ep in range(epochs):
     optimizer.zero_grad()
     pbar = tqdm(loader, desc=f"Epoch {ep+1}/{epochs}")
@@ -82,7 +89,8 @@ def main():
 
       pbar.set_postfix(loss=(loss.item() * accum))
 
-  # Save adapters
+  # Here we save the LoRA adapters to the output directory
+  # and the model weights to the base model path
   os.makedirs(cfg["output_dir"], exist_ok=True)
   pipe.unet.save_pretrained(cfg["output_dir"])
   print(f"Saved LoRA adapters to {cfg['output_dir']}")
