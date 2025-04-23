@@ -61,7 +61,7 @@ python src/train_lora.py --config configs/train.yaml
 python src/inference.py \
   --base_model runwayml/stable-diffusion-v1-5 \
   --lora_adapter models/lora_adapters \
-  --prompt "Aerial view of a city at sunset" \
+  --prompt "YOUR PROMPT HERE" \
   --output_dir outputs
 ```
 
@@ -92,7 +92,7 @@ optimum-cli export onnx \
 ```bash
 python src/inference_onnx.py \
   --onnx_dir onnx/ \
-  --prompt "Aerial view of a city at sunset"
+  --prompt "YOUR PROMPT HERE"
 ```
 
 ## Directory & File Notes
