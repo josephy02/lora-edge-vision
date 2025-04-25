@@ -95,16 +95,6 @@ python src/inference_onnx.py \
   --prompt "YOUR PROMPT HERE"
 ```
 
-## Directory & File Notes
-
-- `.gitignore`: excludes large model and data artifacts.
-- `configs/train.yaml`: hyperparameters for LoRA training.
-- `src/train_lora.py`: MPS/CPU‐friendly script with latent precompute support.
-- `scripts/merge_pipeline.py`: merges base SD + LoRA into a single HF pipeline.
-- `src/export_onnx.py`: manual ONNX export for the LoRA‐wrapped UNet.
-- `src/inference_onnx.py`: runs the ONNX pipeline on CPU via ONNX Runtime.
-
-
 ### 8. Run Complete Demo
 
 To demonstrate the entire pipeline and benchmark performance check out `notebooks/exploratory.ipynb`
