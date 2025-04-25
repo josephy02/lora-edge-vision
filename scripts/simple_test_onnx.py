@@ -22,19 +22,19 @@ def test_onnx_model(model_path):
         inputs = session.get_inputs()
         print(f"Model has {len(inputs)} inputs:")
         for i, input_info in enumerate(inputs):
-            print(f"  Input #{i}:")
-            print(f"    Name: {input_info.name}")
-            print(f"    Shape: {input_info.shape}")
-            print(f"    Type: {input_info.type}")
+            print(f"Input #{i}:")
+            print(f"Name: {input_info.name}")
+            print(f"Shape: {input_info.shape}")
+            print(f"Type: {input_info.type}")
 
         # Get output details
         outputs = session.get_outputs()
         print(f"Model has {len(outputs)} outputs:")
         for i, output_info in enumerate(outputs):
-            print(f"  Output #{i}:")
-            print(f"    Name: {output_info.name}")
-            print(f"    Shape: {output_info.shape}")
-            print(f"    Type: {output_info.type}")
+            print(f"Output #{i}:")
+            print(f"Name: {output_info.name}")
+            print(f"Shape: {output_info.shape}")
+            print(f"Type: {output_info.type}")
 
         return True
 
