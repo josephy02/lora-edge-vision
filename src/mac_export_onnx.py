@@ -4,6 +4,7 @@ import argparse
 from diffusers import StableDiffusionPipeline
 from peft import PeftModel
 
+
 def export_onnx_for_mac(base_model, lora_adapter, onnx_dir, opset_version=13):
   """
   Export the UNet model to ONNX format with settings optimized for macOS compatibility.
@@ -63,6 +64,7 @@ def export_onnx_for_mac(base_model, lora_adapter, onnx_dir, opset_version=13):
   print(f"UNet successfully exported to {onnx_model_path}")
   return onnx_model_path
 
+
 def main():
   parser = argparse.ArgumentParser(description="Export LoRA-adapted UNet to ONNX (macOS optimized)")
   parser.add_argument("--base_model", required=True, help="Path to base model")
@@ -78,6 +80,7 @@ def main():
     args.output_dir,
     args.opset
   )
+
 
 if __name__ == "__main__":
   main()

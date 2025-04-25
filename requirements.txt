@@ -16,4 +16,3 @@ opencv-python>=4.5.1
 opencv-python-headless>=4.5.1
 wandb>=0.15.0
 gradio>=3.0.0
-git+

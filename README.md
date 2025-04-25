@@ -11,13 +11,13 @@ This repository demonstrates end-to-end Low-Rank Adaptation (LoRA) fine-tuning o
 │   └── train.yaml           # Training configuration
 ├── data/
 │   ├── raw_images/          # Original images (ignored)
-│   ├── processed_images/    # Processed & resized images
-│   └── latents/             # Precomputed VAE latents
+│   ├── processed_images/    # Processed & resized images (ignored)
+│   └── latents/             # Precomputed VAE latents (ignored)
 ├── models/
 │   ├── lora_adapters/       # Trained LoRA weights (ignored)
 │   └── sd_lora_pipeline/    # Merged base+LoRA pipeline (ignored)
 ├── onnx/                    # ONNX export outputs (ignored)
-├── outputs/                 # Sample inference outputs (ignored)
+├── outputs/                 # Sample inference outputs
 ├── scripts/
 │   ├── precompute_latents.py # Precompute VAE latents from images
 │   ├── merge_pipeline.py     # Merge base SD + LoRA weights
@@ -104,3 +104,54 @@ python src/inference_onnx.py \
 - `src/export_onnx.py`: manual ONNX export for the LoRA‐wrapped UNet.
 - `src/inference_onnx.py`: runs the ONNX pipeline on CPU via ONNX Runtime.
 
+
+### 8. Run Complete Demo
+
+To demonstrate the entire pipeline and benchmark performance check out `notebooks/exploratory.ipynb`
+
+This will:
+1. Generate images with both PyTorch and ONNX models
+2. Benchmark performance differences
+3. Create a visual comparison gallery
+4. Save all results to `demo_outputs/`
+
+#### Key Features
+
+- **Memory-Efficient Training**: Optimized for devices with limited GPU memory, including Apple Silicon MPS support
+- **Checkpointing**: Saves best model and regular checkpoints to prevent losing progress
+- **ONNX Optimization**: Specialized export paths for different platforms, including macOS
+- **Performance Benchmarking**: Tools to compare PyTorch vs ONNX inference speed and memory usage
+- **Edge Deployment**: Optimized for on-device inference with reduced model size and memory footprint
+
+#### Technical Notes
+
+- **LoRA Configuration**: The default configuration uses rank=4, alpha=16 for a good balance of parameter efficiency and quality
+- **Latent Precomputation**: Training uses precomputed latents to bypass VAE encoding during training, significantly speeding up the process
+- **Attention Handling**: Special handling of attention mechanisms for ONNX compatibility
+- **Quantization Options**: INT8 quantization available for further size reduction
+
+#### Platform-Specific Notes
+
+#### Apple Silicon (M1/M2/M3)
+
+- Uses Metal Performance Shaders (MPS) backend during training when available
+- Requires specific ONNX export handling for attention mechanisms
+- May benefit from the macOS-specific export scripts
+
+#### CUDA GPUs
+
+- Faster training and inference compared to CPU/MPS
+- Standard ONNX export works well without special handling
+- Supports larger batch sizes during training
+
+### Edge Devices
+
+- INT8 quantization recommended for maximum efficiency
+- Use only UNet in ONNX format if memory is very constrained
+- Consider lower resolution (256×256) for faster inference
+
+#### Customization
+
+- Modify `configs/train.yaml` to adjust training parameters
+- Edit prompt templates in dataset loaders for domain-specific fine-tuning
+- Adjust ONNX export parameters for specific target devices

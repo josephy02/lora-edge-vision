@@ -2,6 +2,7 @@ import os
 import numpy as np
 import onnxruntime as ort
 
+
 def test_onnx_model(model_path):
     """Test if an ONNX model can be loaded and run with a simple input."""
     print(f"Testing ONNX model: {model_path}")
@@ -42,6 +43,7 @@ def test_onnx_model(model_path):
         import traceback
         traceback.print_exc()
         return False
+
 
 def main():
     # Check all possible model locations
