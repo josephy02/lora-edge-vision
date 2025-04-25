@@ -38,7 +38,7 @@ data/latents/
 
 # ONNX and inference outputs
 onnx/
-outputs/
+onnx_mac/
 
 # Scripts outputs and caches
 *.pt
